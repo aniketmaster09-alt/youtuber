@@ -1,61 +1,317 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>YouTube Downloader</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Downloader</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-        input, button { padding: 10px; margin: 5px; }
-        input[type="url"] { width: 400px; }
-        .formats { margin-top: 20px; }
-        .format { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0f0f23;color:#e5e5e5;min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:#1a1a2e;border-radius:20px;border:1px solid #16213e;overflow:hidden}
+        .header{background:linear-gradient(135deg,#ff4757,#ff3742);color:white;padding:40px;text-align:center;position:relative}
+        .header h1{font-size:3em;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
+        .header p{font-size:1.1em;opacity:.9;position:relative;z-index:1}
+        .input-section{padding:40px;background:#16213e}
+        .input-group{display:flex;gap:15px;margin-bottom:25px}
+        #urlInput{flex:1;padding:18px 20px;background:#0f0f23;border:2px solid #2c3e50;border-radius:12px;font-size:16px;color:#e5e5e5;outline:none;transition:all .3s ease}
+        #urlInput:focus{border-color:#ff4757;box-shadow:0 0 0 3px rgba(255,71,87,.1)}
+        #downloadBtn{padding:18px 35px;background:linear-gradient(135deg,#ff4757,#ff3742);color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 15px rgba(255,71,87,.3)}
+        #downloadBtn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,71,87,.4)}
+        #downloadBtn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+        .loading{text-align:center;padding:20px;display:none}
+        .spinner{border:4px solid #f3f3f3;border-top:4px solid #667eea;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 10px}
+        @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+        .video-info{display:none;padding:40px;background:#1a1a2e}
+        .video-header{display:flex;gap:25px;margin-bottom:30px;padding:25px;background:#16213e;border-radius:15px;border:1px solid #2c3e50}
+        .thumbnail{width:160px;height:120px;border-radius:12px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+        .formats{margin-top:20px}
+        .format-category h4{margin-bottom:20px;padding:15px 20px;background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;font-size:1.1em;font-weight:600}
+        .format-item{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;background:#16213e;border:1px solid #2c3e50;border-radius:12px;margin-bottom:12px;transition:all .3s ease}
+        .format-item:hover{background:#1e2a47;border-color:#ff4757;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
+        .download-link{padding:12px 24px;background:linear-gradient(135deg,#00d2d3,#54a0ff);color:white;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;transition:all .3s ease;box-shadow:0 4px 15px rgba(84,160,255,.3)}
+        .download-link:hover{background:linear-gradient(135deg,#54a0ff,#00d2d3);transform:translateY(-2px);box-shadow:0 8px 25px rgba(84,160,255,.4)}
+        .play-btn{padding:12px 20px;background:linear-gradient(135deg,#2ed573,#1dd1a1);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s ease;margin-right:10px;box-shadow:0 4px 15px rgba(45,213,115,.3)}
+        .play-btn:hover{background:linear-gradient(135deg,#1dd1a1,#2ed573);transform:translateY(-2px);box-shadow:0 8px 25px rgba(45,213,115,.4)}
+        .format-actions{display:flex;align-items:center;}
+        .js-player{position:relative;background:#000;border-radius:12px;overflow:hidden;}
+        .js-player video{width:100%;height:400px;display:block;}
+        .player-controls{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:15px;display:flex;align-items:center;gap:10px;}
+        .play-pause{background:none;border:none;color:white;font-size:20px;cursor:pointer;padding:5px;}
+        .progress-bar{flex:1;height:6px;background:rgba(255,255,255,.3);border-radius:3px;cursor:pointer;position:relative;}
+        .progress-fill{height:100%;background:#ff4757;border-radius:3px;width:0;transition:width .1s;}
+        .time-display{color:white;font-size:12px;min-width:80px;text-align:center;}
+        .volume-control{display:flex;align-items:center;gap:5px;}
+        .volume-slider{width:60px;height:4px;}
+        .fullscreen-btn{background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px;}
+        .error{background:linear-gradient(135deg,#ff4757,#ff3742);color:white;padding:20px;border-radius:12px;margin:20px 40px;display:none;border:1px solid rgba(255,71,87,.3)}
     </style>
 </head>
 <body>
-    <h1>YouTube Downloader</h1>
-    <input type="url" id="urlInput" placeholder="Enter YouTube URL">
-    <button onclick="getFormats()">Get Download Links</button>
+<div class="container">
+  <div class="header">
+    <h1>🎥 YouTube Downloader</h1>
+    <p>Download YouTube videos in various formats</p>
+  </div>
+
+  <div class="input-section">
+    <div class="input-group">
+      <input type="text" id="urlInput" placeholder="Paste YouTube URL here..." />
+      <button id="downloadBtn" onclick="fetchVideoInfo()">Get Download Links</button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Fetching video information...</p>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="video-info" id="videoInfo">
+    <div class="video-header">
+      <img id="thumbnail" class="thumbnail" src="" alt="Video thumbnail">
+      <div>
+        <h3 id="videoTitle"></h3>
+        <p><strong>Duration:</strong> <span id="duration"></span></p>
+        <p><strong>Source:</strong> <span id="source"></span></p>
+      </div>
+    </div>
+    <div class="video-player" id="videoPlayer" style="display:none;margin:20px 0;">
+      <div style="margin-bottom:10px;">
+        <select id="qualitySelect" style="padding:8px;background:#16213e;color:#e5e5e5;border:1px solid #2c3e50;border-radius:6px;" onchange="changeQuality()">Quality</select>
+      </div>
+      <div class="js-player" id="jsPlayer">
+        <video id="playerVideo"></video>
+        <div class="player-controls">
+          <button class="play-pause" onclick="togglePlay()">▶</button>
+          <div class="progress-bar" onclick="seek(event)">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+          <select id="playerQuality" style="background:#333;color:white;border:none;padding:4px;border-radius:4px;" onchange="changePlayerQuality()"></select>
+          <div class="volume-control">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1" onchange="setVolume()">
+          </div>
+          <button class="download-current-btn" onclick="downloadCurrentVideo()" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px;" title="Download Current Quality">⬇</button>
+          <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+        </div>
+      </div>
+    </div>
+    <div class="formats" id="formats"></div>
+  </div>
+</div>
+
+<script>
+async function fetchVideoInfo() {
+  const urlInput = document.getElementById('urlInput');
+  const url = urlInput.value.trim();
+
+  if (!url) return showError('Please enter a YouTube URL');
+  if (!isValidYouTubeUrl(url)) return showError('Please enter a valid YouTube URL');
+
+  showLoading(true); hideError(); hideVideoInfo();
+
+  try {
+    const apiUrl = `https://api.vidfly.ai/api/media/youtube/download?url=${encodeURIComponent(url)}`;
+    const response = await fetch(apiUrl);
+    if (!response.ok) throw new Error("Failed to fetch video info");
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    displayA2ZResult(data);
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function isValidYouTubeUrl(url){
+  return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(url);
+}
+
+function displayA2ZResult(data){
+  const info=data.data;
+  document.getElementById('thumbnail').src=info.cover;
+  document.getElementById('videoTitle').textContent=info.title;
+  document.getElementById('duration').textContent=formatDuration(info.duration);
+  document.getElementById('source').textContent='YouTube';
+
+  const allVideos=info.items.filter(i=>i.type.includes('video')||i.type==='video_with_audio');
+  if(allVideos.length){
+    setupVideoPlayer(allVideos);
+    document.getElementById('videoPlayer').style.display='block';
+  }
+
+  const formatsContainer=document.getElementById('formats');
+  formatsContainer.innerHTML='';
+
+  const videoFormats=info.items.filter(i=>i.type.includes('video'));
+  const audioFormats=info.items.filter(i=>i.type==='audio');
+
+  if(videoFormats.length)formatsContainer.appendChild(createFormatSection('Video Formats',videoFormats));
+  if(audioFormats.length)formatsContainer.appendChild(createFormatSection('Audio Formats',audioFormats));
+
+  document.getElementById('videoInfo').style.display='block';
+}
+
+function createFormatSection(title,formats){
+  const section=document.createElement('div');
+  section.className='format-category';
+  const h4=document.createElement('h4');
+  h4.textContent=title; section.appendChild(h4);
+
+  formats.forEach(format=>{
+    const item=document.createElement('div');
+    item.className='format-item';
+    const info=document.createElement('div');
+    info.innerHTML=`<div>${format.label}</div><div style="color:#95a5a6;font-size:13px;">${format.ext.toUpperCase()} • ${format.width||''}x${format.height||''}</div>`;
+
+    const actions=document.createElement('div');
+    actions.className='format-actions';
     
-    <div id="result"></div>
+    const playBtn=document.createElement('button');
+    playBtn.className='play-btn';
+    playBtn.textContent='▶ Play';
+    playBtn.onclick=()=>playVideo(format.url);
+    
+    const dl=document.createElement('button');
+    dl.className='download-link';
+    dl.textContent='⬇ Download';
+    dl.onclick=()=>downloadVideo(format.url,format.label,format.ext);
 
-    <script>
-        async function getFormats() {
-            const url = document.getElementById('urlInput').value;
-            const result = document.getElementById('result');
-            
-            if (!url) {
-                result.innerHTML = '<p style="color: red;">Please enter a URL</p>';
-                return;
-            }
+    actions.appendChild(playBtn);
+    actions.appendChild(dl);
+    item.appendChild(info);
+    item.appendChild(actions);
+    section.appendChild(item);
+  });
+  return section;
+}
 
-            result.innerHTML = '<p>Loading...</p>';
+function setupVideoPlayer(videos){
+  const select=document.getElementById('qualitySelect');
+  const playerSelect=document.getElementById('playerQuality');
+  const video=document.getElementById('playerVideo');
+  
+  select.innerHTML='';
+  playerSelect.innerHTML='';
+  
+  videos.forEach((v,i)=>{
+    const option1=document.createElement('option');
+    option1.value=i;
+    option1.textContent=v.label;
+    select.appendChild(option1);
+    
+    const option2=document.createElement('option');
+    option2.value=i;
+    option2.textContent=v.label;
+    playerSelect.appendChild(option2);
+  });
+  
+  window.videoSources=videos;
+  video.src=videos[0].url;
+}
 
-            try {
-                const response = await fetch('/.netlify/functions/download', {
-                    method: 'POST',
-                    body: JSON.stringify({ url })
-                });
+function changeQuality(){
+  const select=document.getElementById('qualitySelect');
+  const video=document.getElementById('playerVideo');
+  const currentTime=video.currentTime;
+  video.src=window.videoSources[select.value].url;
+  video.currentTime=currentTime;
+  document.getElementById('playerQuality').value=select.value;
+}
 
-                const data = await response.json();
+function changePlayerQuality(){
+  const select=document.getElementById('playerQuality');
+  const video=document.getElementById('playerVideo');
+  const currentTime=video.currentTime;
+  video.src=window.videoSources[select.value].url;
+  video.currentTime=currentTime;
+  document.getElementById('qualitySelect').value=select.value;
+}
 
-                if (response.ok) {
-                    result.innerHTML = `
-                        <h3>${data.title}</h3>
-                        <div class="formats">
-                            ${data.formats.map(f => `
-                                <div class="format">
-                                    <strong>${f.quality}</strong> (${f.container})
-                                    <br><a href="${f.url}" download>Download</a>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                } else {
-                    result.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
-                }
-            } catch (error) {
-                result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-            }
-        }
-    </script>
+function playVideo(url){
+  const video=document.getElementById('playerVideo');
+  video.src=url;
+  video.play();
+  document.getElementById('videoPlayer').style.display='block';
+  video.scrollIntoView({behavior:'smooth'});
+}
+
+function togglePlay(){
+  const video=document.getElementById('playerVideo');
+  const btn=document.querySelector('.play-pause');
+  if(video.paused){video.play();btn.textContent='⏸';}else{video.pause();btn.textContent='▶';}
+}
+
+function seek(e){
+  const video=document.getElementById('playerVideo');
+  const bar=e.currentTarget;
+  const rect=bar.getBoundingClientRect();
+  const pos=(e.clientX-rect.left)/rect.width;
+  video.currentTime=pos*video.duration;
+}
+
+function setVolume(){
+  const video=document.getElementById('playerVideo');
+  const slider=document.getElementById('volumeSlider');
+  video.volume=slider.value;
+}
+
+function toggleFullscreen(){
+  const player=document.getElementById('jsPlayer');
+  if(document.fullscreenElement){document.exitFullscreen();}else{player.requestFullscreen();}
+}
+
+function updateProgress(){
+  const video=document.getElementById('playerVideo');
+  const fill=document.getElementById('progressFill');
+  const time=document.getElementById('timeDisplay');
+  if(video.duration){
+    const progress=(video.currentTime/video.duration)*100;
+    fill.style.width=progress+'%';
+    time.textContent=formatTime(video.currentTime)+' / '+formatTime(video.duration);
+  }
+}
+
+function formatTime(s){
+  const m=Math.floor(s/60);
+  const sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+
+function downloadVideo(url,label,ext){
+  const title=document.getElementById('videoTitle').textContent;
+  const filename=`${title}_${label}.${ext}`;
+  
+  // Use Netlify function
+  const netlifyUrl='https://you-downloader.netlify.app/.netlify/functions/proxy';
+  const proxyUrl=`${netlifyUrl}?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+  
+  const link=document.createElement('a');
+  link.href=proxyUrl;
+  link.download=filename;
+  link.style.display='none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function downloadCurrentVideo(){
+  const select=document.getElementById('playerQuality');
+  const currentQuality=window.videoSources[select.value];
+  downloadVideo(currentQuality.url,currentQuality.label,currentQuality.ext);
+}
+
+function formatDuration(s){const m=Math.floor(s/60),r=s%60;return `${m}:${r.toString().padStart(2,'0')}`}
+function showLoading(b){document.getElementById('loading').style.display=b?'block':'none';document.getElementById('downloadBtn').disabled=b;}
+function showError(msg){const e=document.getElementById('error');e.textContent=msg;e.style.display='block';}
+function hideError(){document.getElementById('error').style.display='none';}
+function hideVideoInfo(){document.getElementById('videoInfo').style.display='none';document.getElementById('videoPlayer').style.display='none';document.getElementById('playerVideo').src='';}
+
+setInterval(updateProgress,100);
+</script>
 </body>
 </html>
