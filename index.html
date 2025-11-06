@@ -5,45 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Video Downloader</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',sans-serif;background:#0f0f23;color:#e5e5e5;min-height:100vh;padding:20px}
-        .container{max-width:900px;margin:0 auto;background:#1a1a2e;border-radius:20px;border:1px solid #16213e;overflow:hidden}
-        .header{background:linear-gradient(135deg,#ff4757,#ff3742);color:white;padding:40px;text-align:center;position:relative}
-        .header h1{font-size:3em;font-weight:700;margin-bottom:10px;position:relative;z-index:1}
-        .header p{font-size:1.1em;opacity:.9;position:relative;z-index:1}
-        .input-section{padding:40px;background:#16213e}
-        .input-group{display:flex;gap:15px;margin-bottom:25px}
-        #urlInput{flex:1;padding:18px 20px;background:#0f0f23;border:2px solid #2c3e50;border-radius:12px;font-size:16px;color:#e5e5e5;outline:none;transition:all .3s ease}
-        #urlInput:focus{border-color:#ff4757;box-shadow:0 0 0 3px rgba(255,71,87,.1)}
-        #downloadBtn{padding:18px 35px;background:linear-gradient(135deg,#ff4757,#ff3742);color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 15px rgba(255,71,87,.3)}
-        #downloadBtn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,71,87,.4)}
-        #downloadBtn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
-        .loading{text-align:center;padding:20px;display:none}
-        .spinner{border:4px solid #f3f3f3;border-top:4px solid #667eea;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto 10px}
-        @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-        .video-info{display:none;padding:40px;background:#1a1a2e}
-        .video-header{display:flex;gap:25px;margin-bottom:30px;padding:25px;background:#16213e;border-radius:15px;border:1px solid #2c3e50}
-        .thumbnail{width:160px;height:120px;border-radius:12px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.3)}
-        .formats{margin-top:20px}
-        .format-category h4{margin-bottom:20px;padding:15px 20px;background:linear-gradient(135deg,#2c3e50,#34495e);border-radius:10px;font-size:1.1em;font-weight:600}
-        .format-item{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;background:#16213e;border:1px solid #2c3e50;border-radius:12px;margin-bottom:12px;transition:all .3s ease}
-        .format-item:hover{background:#1e2a47;border-color:#ff4757;transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
-        .download-link{padding:12px 24px;background:linear-gradient(135deg,#00d2d3,#54a0ff);color:white;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;transition:all .3s ease;box-shadow:0 4px 15px rgba(84,160,255,.3)}
-        .download-link:hover{background:linear-gradient(135deg,#54a0ff,#00d2d3);transform:translateY(-2px);box-shadow:0 8px 25px rgba(84,160,255,.4)}
-        .play-btn{padding:12px 20px;background:linear-gradient(135deg,#2ed573,#1dd1a1);color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s ease;margin-right:10px;box-shadow:0 4px 15px rgba(45,213,115,.3)}
-        .play-btn:hover{background:linear-gradient(135deg,#1dd1a1,#2ed573);transform:translateY(-2px);box-shadow:0 8px 25px rgba(45,213,115,.4)}
-        .format-actions{display:flex;align-items:center;}
-        .js-player{position:relative;background:#000;border-radius:12px;overflow:hidden;}
-        .js-player video{width:100%;height:400px;display:block;}
-        .player-controls{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));padding:15px;display:flex;align-items:center;gap:10px;}
-        .play-pause{background:none;border:none;color:white;font-size:20px;cursor:pointer;padding:5px;}
-        .progress-bar{flex:1;height:6px;background:rgba(255,255,255,.3);border-radius:3px;cursor:pointer;position:relative;}
-        .progress-fill{height:100%;background:#ff4757;border-radius:3px;width:0;transition:width .1s;}
-        .time-display{color:white;font-size:12px;min-width:80px;text-align:center;}
-        .volume-control{display:flex;align-items:center;gap:5px;}
-        .volume-slider{width:60px;height:4px;}
-        .fullscreen-btn{background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:5px;}
-        .error{background:linear-gradient(135deg,#ff4757,#ff3742);color:white;padding:20px;border-radius:12px;margin:20px 40px;display:none;border:1px solid rgba(255,71,87,.3)}
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-color: #ff4757;
+            --secondary-color: #3742fa;
+            --background-color: #1a1a2e;
+            --surface-color: #2c3e50;
+            --text-color: #e5e5e5;
+            --border-radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--background-color); color: var(--text-color); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: var(--surface-color); border-radius: var(--border-radius); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .header { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 40px; text-align: center; }
+        .header h1 { font-size: 2.5em; font-weight: 700; margin-bottom: 10px; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section { padding: 40px; background: #16213e; }
+        .input-group { display: flex; gap: 15px; }
+        #urlInput { flex: 1; padding: 18px 20px; background: #0f0f23; border: 2px solid #2c3e50; border-radius: var(--border-radius); font-size: 16px; color: var(--text-color); outline: none; transition: all .3s ease; }
+        #urlInput:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(255,71,87,.2); }
+        #downloadBtn { padding: 18px 35px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; border: none; border-radius: var(--border-radius); font-size: 16px; font-weight: 600; cursor: pointer; transition: all .3s ease; }
+        #downloadBtn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        #downloadBtn:disabled { opacity: .6; cursor: not-allowed; }
+        .loading { text-align: center; padding: 40px; display: none; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .video-info { display: none; padding: 40px; }
+        .video-header { display: flex; gap: 25px; margin-bottom: 30px; align-items: center; }
+        .thumbnail { width: 160px; height: 90px; border-radius: var(--border-radius); object-fit: cover; }
+        .formats { margin-top: 20px; }
+        .format-category h4 { margin-bottom: 15px; font-size: 1.2em; color: var(--primary-color); border-bottom: 2px solid var(--surface-color); padding-bottom: 10px; }
+        .format-item { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 15px; background: #16213e; border-radius: var(--border-radius); margin-bottom: 10px; transition: all .3s ease; }
+        .format-item:hover { background: #1e2a47; }
+        .download-link, .play-btn { padding: 10px 20px; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600; transition: all .3s ease; cursor: pointer; border: none; }
+        .download-link { background: linear-gradient(135deg, #00d2d3, #54a0ff); }
+        .play-btn { background: linear-gradient(135deg, #2ed573, #1dd1a1); margin-right: 10px; }
+        .format-actions { display: flex; }
+        .js-player { position: relative; background: #000; border-radius: var(--border-radius); overflow: hidden; margin-top: 20px; }
+        .js-player video { width: 100%; display: block; }
+        .player-controls { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.8)); padding: 15px; display: flex; align-items: center; gap: 15px; }
+        .play-pause, .fullscreen-btn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .progress-bar { flex: 1; height: 8px; background: rgba(255,255,255,.3); border-radius: 4px; cursor: pointer; }
+        .progress-fill { height: 100%; background: var(--primary-color); border-radius: 4px; width: 0; }
+        .time-display { color: white; font-size: 12px; }
+        .volume-control { display: flex; align-items: center; gap: 8px; }
+        .volume-slider { width: 80px; }
+        .error { background: #ff4757; color: white; padding: 20px; border-radius: var(--border-radius); margin: 20px 40px; display: none; }
     </style>
 </head>
 <body>
@@ -112,7 +121,7 @@ async function fetchVideoInfo() {
   showLoading(true); hideError(); hideVideoInfo();
 
   try {
-    const apiUrl = `https://youtube-jump.netlify.app/.netlify/functions/proxy?action=info&url=${encodeURIComponent(url)}`;
+    const apiUrl = `/.netlify/functions/proxy?action=info&url=${encodeURIComponent(url)}`;
     const response = await fetch(apiUrl);
     if (!response.ok) throw new Error("Failed to fetch video info");
 
@@ -138,8 +147,13 @@ function displayA2ZResult(data){
   document.getElementById('duration').textContent=formatDuration(info.duration);
   document.getElementById('source').textContent='YouTube';
 
-  const allVideos=info.items.filter(i=>i.type.includes('video')||i.type==='video_with_audio');
-  if(allVideos.length){
+  const formats=info.items;
+  const videoWithAudio=formats.filter(f=>f.type==='video_with_audio');
+  const videoOnly=formats.filter(f=>f.type==='video');
+  const audioOnly=formats.filter(f=>f.type==='audio');
+
+  if(videoWithAudio.length || videoOnly.length){
+    const allVideos=[...videoWithAudio,...videoOnly];
     setupVideoPlayer(allVideos);
     document.getElementById('videoPlayer').style.display='block';
   }
@@ -147,11 +161,9 @@ function displayA2ZResult(data){
   const formatsContainer=document.getElementById('formats');
   formatsContainer.innerHTML='';
 
-  const videoFormats=info.items.filter(i=>i.type.includes('video'));
-  const audioFormats=info.items.filter(i=>i.type==='audio');
-
-  if(videoFormats.length)formatsContainer.appendChild(createFormatSection('Video Formats',videoFormats));
-  if(audioFormats.length)formatsContainer.appendChild(createFormatSection('Audio Formats',audioFormats));
+  if(videoWithAudio.length)formatsContainer.appendChild(createFormatSection('Video with Audio',videoWithAudio));
+  if(videoOnly.length)formatsContainer.appendChild(createFormatSection('Video Only',videoOnly));
+  if(audioOnly.length)formatsContainer.appendChild(createFormatSection('Audio Only',audioOnly));
 
   document.getElementById('videoInfo').style.display='block';
 }
@@ -166,22 +178,24 @@ function createFormatSection(title,formats){
     const item=document.createElement('div');
     item.className='format-item';
     const info=document.createElement('div');
-    info.innerHTML=`<div>${format.label}</div><div style="color:#95a5a6;font-size:13px;">${format.ext.toUpperCase()} • ${format.width||''}x${format.height||''}</div>`;
+    info.innerHTML=`<div>${format.label}</div><div style="color:#95a5a6;font-size:13px;">${format.ext.toUpperCase()}</div>`;
 
     const actions=document.createElement('div');
     actions.className='format-actions';
     
-    const playBtn=document.createElement('button');
-    playBtn.className='play-btn';
-    playBtn.textContent='▶ Play';
-    playBtn.onclick=()=>playVideo(format.url);
+    if(format.type.includes('video')){
+      const playBtn=document.createElement('button');
+      playBtn.className='play-btn';
+      playBtn.textContent='▶ Play';
+      playBtn.onclick=()=>playVideo(format.url);
+      actions.appendChild(playBtn);
+    }
     
     const dl=document.createElement('button');
     dl.className='download-link';
     dl.textContent='⬇ Download';
     dl.onclick=()=>downloadVideo(format.url,format.label,format.ext);
 
-    actions.appendChild(playBtn);
     actions.appendChild(dl);
     item.appendChild(info);
     item.appendChild(actions);
@@ -194,6 +208,7 @@ function setupVideoPlayer(videos){
   const select=document.getElementById('qualitySelect');
   const playerSelect=document.getElementById('playerQuality');
   const video=document.getElementById('playerVideo');
+  const thumbnail = document.getElementById('thumbnail').src;
   
   select.innerHTML='';
   playerSelect.innerHTML='';
@@ -212,6 +227,7 @@ function setupVideoPlayer(videos){
   
   window.videoSources=videos;
   video.src=videos[0].url;
+  video.poster = thumbnail;
 }
 
 function changeQuality(){
@@ -284,10 +300,10 @@ function formatTime(s){
 
 function downloadVideo(url,label,ext){
   const title=document.getElementById('videoTitle').textContent;
-  const filename=`${title}_${label}.${ext}`.replace(/[\\/:"*?<>|]/g, '');
+  const filename=`${title}_${label}.${ext}`;
   
   const netlifyUrl='/.netlify/functions/proxy';
-  const proxyUrl=`${netlifyUrl}?action=download&url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+  const proxyUrl=`${netlifyUrl}?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
   
   const link=document.createElement('a');
   link.href=proxyUrl;
