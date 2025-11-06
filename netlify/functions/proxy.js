@@ -33,6 +33,9 @@ exports.handler = async (event, context) => {
         throw new Error(`HTTP ${response.status}`);
       }
 
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+
       return {
         statusCode: 200,
         headers: {
@@ -40,8 +43,8 @@ exports.handler = async (event, context) => {
           'Content-Disposition': `attachment; filename="${decodeURIComponent(filename) || 'video.mp4'}"`,
           'Access-Control-Allow-Origin': '*'
         },
-        body: response.body,
-        isBase64Encoded: false
+        body: base64,
+        isBase64Encoded: true
       };
     }
   } catch (error) {
