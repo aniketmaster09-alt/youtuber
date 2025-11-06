@@ -284,11 +284,10 @@ function formatTime(s){
 
 function downloadVideo(url,label,ext){
   const title=document.getElementById('videoTitle').textContent;
-  const filename=`${title}_${label}.${ext}`;
+  const filename=`${title}_${label}.${ext}`.replace(/[\\/:"*?<>|]/g, '');
   
-  // Use Netlify function
-  const netlifyUrl='https://youtube-jump.netlify.app/.netlify/functions/proxy';
-  const proxyUrl=`${netlifyUrl}?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+  const netlifyUrl='/.netlify/functions/proxy';
+  const proxyUrl=`${netlifyUrl}?action=download&url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
   
   const link=document.createElement('a');
   link.href=proxyUrl;
