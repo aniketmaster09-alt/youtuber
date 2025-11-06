@@ -112,7 +112,7 @@ async function fetchVideoInfo() {
   showLoading(true); hideError(); hideVideoInfo();
 
   try {
-    const apiUrl = `https://you-downloader.netlify.app/.netlify/functions/proxy?action=info&url=${encodeURIComponent(url)}`;
+    const apiUrl = `https://youtube-jump.netlify.app/.netlify/functions/proxy?action=info&url=${encodeURIComponent(url)}`;
     const response = await fetch(apiUrl);
     if (!response.ok) throw new Error("Failed to fetch video info");
 
@@ -287,7 +287,7 @@ function downloadVideo(url,label,ext){
   const filename=`${title}_${label}.${ext}`;
   
   // Use Netlify function
-  const netlifyUrl='https://you-downloader.netlify.app/.netlify/functions/proxy';
+  const netlifyUrl='https://youtube-jump.netlify.app/.netlify/functions/proxy';
   const proxyUrl=`${netlifyUrl}?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
   
   const link=document.createElement('a');
