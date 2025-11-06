@@ -1,5 +1,5 @@
 exports.handler = async (event, context) => {
-  const { url, filename } = event.queryStringParameters;
+  const { url, filename, action } = event.queryStringParameters;
   
   if (!url) {
     return {
@@ -9,6 +9,23 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    // If action is 'info', fetch video info from YouTube API
+    if (action === 'info') {
+      const apiUrl = `https://api.vidfly.ai/api/media/youtube/download?url=${encodeURIComponent(url)}`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify(data)
+      };
+    }
+    
+    // Default: download video
     const response = await fetch(decodeURIComponent(url), {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -27,8 +44,7 @@ exports.handler = async (event, context) => {
       headers: {
         'Content-Type': 'application/octet-stream',
         'Content-Disposition': `attachment; filename="${filename || 'video.mp4'}"`,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type'
+        'Access-Control-Allow-Origin': '*'
       },
       body: base64,
       isBase64Encoded: true
