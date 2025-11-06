@@ -9,7 +9,6 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // If action is 'info', fetch video info from YouTube API
     if (action === 'info') {
       const apiUrl = `https://api.vidfly.ai/api/media/youtube/download?url=${encodeURIComponent(url)}`;
       const response = await fetch(apiUrl);
@@ -23,32 +22,28 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify(data)
       };
-    }
-    
-    // Default: download video
-    const response = await fetch(decodeURIComponent(url), {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    } else {
+      const response = await fetch(decodeURIComponent(url), {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
       }
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="${decodeURIComponent(filename) || 'video.mp4'}"`,
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: response.body,
+        isBase64Encoded: false
+      };
     }
-
-    const buffer = await response.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="${filename || 'video.mp4'}"`,
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: base64,
-      isBase64Encoded: true
-    };
   } catch (error) {
     return {
       statusCode: 500,
