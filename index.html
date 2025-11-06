@@ -305,8 +305,14 @@ function downloadVideo(url,label,ext){
   const netlifyUrl='/.netlify/functions/proxy';
   const proxyUrl=`${netlifyUrl}?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
   
-  // Directly open the proxy URL in a new window/tab to ensure download goes through the proxy
-  window.open(proxyUrl, '_blank');
+  // Create a hidden anchor tag and programmatically click it to trigger download
+  const link = document.createElement('a');
+  link.href = proxyUrl;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 function downloadCurrentVideo(){
